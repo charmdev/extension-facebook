@@ -1,31 +1,19 @@
-buildscript {
-    repositories {
-		mavenCentral()
-        maven {
-            url "https://repo1.maven.org/maven2/"
-        }
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
-    }
-}
-
 apply plugin: 'com.android.library'
 
 android {
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src']
-        }
-    }
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+	sourceSets {
+		main {
+			manifest.srcFile 'AndroidManifest.xml'
+			java.srcDirs = ['src']
+		}
+	}
+	compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+	buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
 }
 
 dependencies {
-    api project(':deps:extension-api')
+	api project(':deps:extension-api')
 	implementation 'com.facebook.android:facebook-android-sdk:4.41.0'
 	implementation 'com.facebook.android:facebook-marketing:4.41.0' 
-	implementation 'com.google.code.gson:gson:2.8.5'
+	implementation "com.google.code.gson:gson:${rootProject.ext.gsonVersion}"
 }
