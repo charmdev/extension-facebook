@@ -1,11 +1,7 @@
 #import <CallbacksDelegate.h>
 #import <FacebookObserver.h>
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
-#import <FBSDKCoreKit/FBSDKSettings.h>
-#import <FBSDKCoreKit/FBSDKAppEvents.h>
 #import <FBSDKLoginKit/FBSDKLoginKit.h>
-#import <FBSDKShareKit/FBSDKAppInviteContent.h>
-#import <FBSDKShareKit/FBSDKAppInviteDialog.h>
 #import <FBSDKShareKit/FBSDKGameRequestContent.h>
 #import <FBSDKShareKit/FBSDKGameRequestDialog.h>
 #import <FBSDKShareKit/FBSDKShareDialog.h>
@@ -90,7 +86,7 @@ namespace extension_facebook {
 		for (auto p : permissions) {
 			[nsPermissions addObject:[NSString stringWithUTF8String:p.c_str()]];
 		}
-		[login logInWithPublishPermissions:nsPermissions fromViewController:root handler:^(FBSDKLoginManagerLoginResult *result, NSError *error) {
+		[login logInWithPermissions:nsPermissions fromViewController:root handler:^(FBSDKLoginManagerLoginResult *result, NSError *error) {
 			if (error) {
 				onLoginErrorCallback([error.localizedDescription UTF8String]);
 			} else if (result.isCancelled) {
@@ -106,7 +102,8 @@ namespace extension_facebook {
 		for (auto p : permissions) {
 			[nsPermissions addObject:[NSString stringWithUTF8String:p.c_str()]];
 		}
-		[login logInWithReadPermissions:nsPermissions fromViewController:root handler:^(FBSDKLoginManagerLoginResult *result, NSError *error) {
+
+		[login logInWithPermissions:nsPermissions fromViewController:root handler:^(FBSDKLoginManagerLoginResult *result, NSError *error) {
 			if (error) {
 				onLoginErrorCallback([error.localizedDescription UTF8String]);
 			} else if (result.isCancelled) {
@@ -115,21 +112,6 @@ namespace extension_facebook {
 				onLoginSuccessCallback();
 			}
 		}];
-	}
-
-	void appInvite(std::string appLinkUrl, std::string previewImageUrl) {
-
-		FBSDKAppInviteContent *content =[[FBSDKAppInviteContent alloc] init];
-		content.appLinkURL = [NSURL URLWithString:[NSString stringWithUTF8String:appLinkUrl.c_str()]];
-		if (previewImageUrl!="") {
-			content.appInvitePreviewImageURL = [NSURL URLWithString:[NSString stringWithUTF8String:previewImageUrl.c_str()]];
-		}
-
-		FBSDKAppInviteDialog *dialog = [[FBSDKAppInviteDialog alloc] init];
-		dialog.content = content;
-		dialog.delegate = callbacks;
-		[dialog show];
-
 	}
 
 	void shareLink(

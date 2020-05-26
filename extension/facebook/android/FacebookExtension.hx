@@ -1,7 +1,8 @@
 package extension.facebook.android;
 
 import haxe.Json;
-import openfl.utils.JNI;
+import nme.JNI;
+
 
 @:build(ShortCuts.mirrors())
 class FacebookExtension {
@@ -42,16 +43,6 @@ class FacebookExtension {
 
 	public static function setOnLoginErrorCallback(f : String->Void) {
 		callbacksObject.onLoginError = f;
-	}
-
-	// App Invite callbacks
-
-	public static function setOnAppInviteComplete(f : String->Void) {	// passes a JSON object to f
-		callbacksObject.onAppInviteComplete = f;
-	}
-
-	public static function setOnAppInviteFail(f : String->Void) {
-		callbacksObject.onAppInviteFail = f;
 	}
 
 	// Game request callbacks
@@ -96,9 +87,6 @@ class FacebookExtension {
 		);
 		JNI.callStatic(fn, [str]);
 	}
-
-	@JNI("org.haxe.extension.facebook", "appInvite")
-	public static function appInvite(appLinkUrl : String, previewImageUrl : String = null) {}
 
 	@JNI("org.haxe.extension.facebook", "shareLink")
 	public static function shareLink(

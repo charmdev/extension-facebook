@@ -13,8 +13,6 @@ namespace extension_facebook {
 	void logInWithPublishPermissions(std::vector<std::string> &permissions);
 	void logInWithReadPermissions(std::vector<std::string> &permissions);
 
-	void appInvite(std::string appLinkUrl, std::string previewImageUrl);
-
 	void shareLink(
 		std::string contentURL,
 		std::string contentTitle,
@@ -40,9 +38,6 @@ namespace extension_facebook {
 	void onLoginSuccessCallback();
 	void onLoginCancelCallback();
 	void onLoginErrorCallback(const char *error);
-
-	void onAppInviteComplete(const char *json);
-	void onAppInviteFail(const char *error);
 
 	void onAppRequestComplete(const char *json);
 	void onAppRequestFail(const char *error);

@@ -1,6 +1,5 @@
 #import <CallbacksDelegate.h>
 #import <Facebook.h>
-#import <FBSDKShareKit/FBSDKAppInviteDialog.h>
 #import <FBSDKShareKit/FBSDKGameRequestDialog.h>
 #import <FBSDKShareKit/FBSDKSharing.h>
 #import <FBSDKCoreKit/FBSDKApplicationDelegate.h>
@@ -19,30 +18,6 @@
 @end
 
 @implementation CallbacksDelegate
-
-// App Invite dialog callbacks:
-
-- (void)appInviteDialog:(FBSDKAppInviteDialog *)appInviteDialog didCompleteWithResults: (NSDictionary *)results {
-	NSError *error;
-	NSData *jsonData = nil;
-	if (results!=nil) {
-	  jsonData = [NSJSONSerialization dataWithJSONObject:results
-                                            options:0
-                                            error:&error];
-	}
-
-	if (!jsonData) {
-		extension_facebook::onAppInviteFail("some error");
-	} else {
-		extension_facebook::onAppInviteComplete(
-			[[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] UTF8String]
-		);
-	}
-}
-
-- (void)appInviteDialog:(FBSDKAppInviteDialog *)appInviteDialog didFailWithError:(NSError *)error {
-	extension_facebook::onAppInviteFail([[error localizedDescription] UTF8String]);
-}
 
 // Game Invite dialog callbacks:
 

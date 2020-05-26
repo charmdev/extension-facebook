@@ -23,8 +23,6 @@ AutoGCRoot* _onTokenChange;
 AutoGCRoot* _onLoginSuccessCallback;
 AutoGCRoot* _onLoginCancelCallback;
 AutoGCRoot* _onLoginErrorCallback;
-AutoGCRoot* _onAppInviteComplete;
-AutoGCRoot* _onAppInviteFail;
 AutoGCRoot* _onAppRequestComplete;
 AutoGCRoot* _onAppRequestFail;
 AutoGCRoot* _onShareComplete;
@@ -44,14 +42,6 @@ void extension_facebook::onLoginCancelCallback() {
 
 void extension_facebook::onLoginErrorCallback(const char *error) {
 	safe_val_call1(_onLoginErrorCallback, safe_alloc_string(error));
-}
-
-void extension_facebook::onAppInviteComplete(const char *json) {
-	safe_val_call1(_onAppInviteComplete, safe_alloc_string(json));
-}
-
-void extension_facebook::onAppInviteFail(const char *error) {
-	safe_val_call1(_onAppInviteFail, safe_alloc_string(error));
 }
 
 void extension_facebook::onAppRequestComplete(const char *json) {
@@ -156,18 +146,6 @@ static value extension_facebook_setOnLoginErrorCallback(value fun) {
 }
 DEFINE_PRIM(extension_facebook_setOnLoginErrorCallback, 1);
 
-static value extension_facebook_setOnAppInviteComplete(value fun) {
-	_onAppInviteComplete = new AutoGCRoot(fun);
-	return alloc_null();
-}
-DEFINE_PRIM(extension_facebook_setOnAppInviteComplete, 1);
-
-static value extension_facebook_setOnAppInviteFail(value fun) {
-	_onAppInviteFail = new AutoGCRoot(fun);
-	return alloc_null();
-}
-DEFINE_PRIM(extension_facebook_setOnAppInviteFail, 1);
-
 static value extension_facebook_setOnAppRequestComplete(value fun) {
 	_onAppRequestComplete = new AutoGCRoot(fun);
 	return alloc_null();
@@ -191,15 +169,6 @@ static value extension_facebook_setOnShareFail(value fun) {
 	return alloc_null();
 }
 DEFINE_PRIM(extension_facebook_setOnShareFail, 1);
-
-static value extension_facebook_appInvite(value appLinkUrl, value previewImageUrl) {
-	extension_facebook::appInvite(
-		safe_val_string(appLinkUrl),
-		safe_val_string(previewImageUrl)
-	);
-	return alloc_null();
-}
-DEFINE_PRIM(extension_facebook_appInvite, 2);
 
 static value extension_facebook_shareLink(
 	value contentURL,
