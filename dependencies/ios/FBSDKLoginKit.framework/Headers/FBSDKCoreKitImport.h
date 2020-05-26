@@ -16,14 +16,15 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#import "FBSDKMessengerShareKit.h"
+// Importing FBSDKCoreKit is tricky due to build variants so putting it here allows us
+// to share that logic in one place.
 
-/**
-
-  This object is used as an override in FBSDKMessengerShareOptions to ensure
- the broadcast flow in Messenger is triggered, even if your app was entered from
- a flow that normally triggers the Messenger reply flow
- */
-@interface FBSDKMessengerBroadcastContext : FBSDKMessengerContext
-
-@end
+#if defined BUCK
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
+#elif defined __cplusplus
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
+#elif defined FBSDKCOCOAPODS
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
+#else
+@import FBSDKCoreKit;
+#endif

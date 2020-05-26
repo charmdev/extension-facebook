@@ -18,7 +18,9 @@
 
 #import <Foundation/Foundation.h>
 
-#import <FBSDKShareKit/FBSDKSharingContent.h>
+#import "FBSDKSharingContent.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol FBSDKSharingDelegate;
 
@@ -28,9 +30,8 @@
  @see FBSDKShareDialog
 
  @see FBSDKMessageDialog
-
- @see FBSDKShareAPI
  */
+NS_SWIFT_NAME(Sharing)
 @protocol FBSDKSharing <NSObject>
 
 /**
@@ -63,6 +64,7 @@
 /**
   The common interface for dialogs that initiate sharing.
  */
+NS_SWIFT_NAME(SharingDialog)
 @protocol FBSDKSharingDialog <FBSDKSharing>
 
 /**
@@ -75,7 +77,7 @@
  @see [FBSDKSharing validateWithError:]
  @return YES if the receiver can share, otherwise NO.
  */
-- (BOOL)canShow;
+@property (nonatomic, readonly) BOOL canShow;
 
 /**
   Shows the dialog.
@@ -92,6 +94,7 @@
  receive the information.  For example, if the person is not signed into the containing app, the sharer may not be able
  to distinguish between completion of a share and cancellation.
  */
+NS_SWIFT_NAME(SharingDelegate)
 @protocol FBSDKSharingDelegate <NSObject>
 
 /**
@@ -99,7 +102,7 @@
  @param sharer The FBSDKSharing that completed.
  @param results The results from the sharer.  This may be nil or empty.
  */
-- (void)sharer:(id<FBSDKSharing>)sharer didCompleteWithResults:(NSDictionary *)results;
+- (void)sharer:(id<FBSDKSharing>)sharer didCompleteWithResults:(NSDictionary<NSString *, id> *)results;
 
 /**
   Sent to the delegate when the sharer encounters an error.
@@ -115,3 +118,5 @@
 - (void)sharerDidCancel:(id<FBSDKSharing>)sharer;
 
 @end
+
+NS_ASSUME_NONNULL_END

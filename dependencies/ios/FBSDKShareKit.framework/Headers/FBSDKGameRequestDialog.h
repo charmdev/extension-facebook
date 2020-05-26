@@ -16,28 +16,50 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#import "TargetConditionals.h"
+
+#if !TARGET_OS_TV
+
 #import <Foundation/Foundation.h>
 
-#import <FBSDKShareKit/FBSDKGameRequestContent.h>
+#import "FBSDKGameRequestContent.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol FBSDKGameRequestDialogDelegate;
 
 /**
   A dialog for sending game requests.
  */
+NS_SWIFT_NAME(GameRequestDialog)
 @interface FBSDKGameRequestDialog : NSObject
 
+- (instancetype)init NS_DESIGNATED_INITIALIZER
+NS_SWIFT_UNAVAILABLE("Use init(content:delegate:) instead");
++ (instancetype)new NS_UNAVAILABLE;
+
 /**
-  Convenience method to build up a game request with content and a delegate.
+ Convenience method to build up a game request with content and a delegate.
  @param content The content for the game request.
  @param delegate The receiver's delegate.
  */
-+ (instancetype)showWithContent:(FBSDKGameRequestContent *)content delegate:(id<FBSDKGameRequestDialogDelegate>)delegate;
++ (instancetype)dialogWithContent:(FBSDKGameRequestContent *)content
+                         delegate:(nullable id<FBSDKGameRequestDialogDelegate>)delegate
+NS_SWIFT_NAME(init(content:delegate:));
+
+/**
+ Convenience method to build up and show a game request with content and a delegate.
+ @param content The content for the game request.
+ @param delegate The receiver's delegate.
+ */
++ (instancetype)showWithContent:(FBSDKGameRequestContent *)content
+                       delegate:(nullable id<FBSDKGameRequestDialogDelegate>)delegate
+NS_SWIFT_UNAVAILABLE("Use init(content:delegate:).show() instead");
 
 /**
   The receiver's delegate or nil if it doesn't have a delegate.
  */
-@property (nonatomic, weak) id<FBSDKGameRequestDialogDelegate> delegate;
+@property (nonatomic, weak, nullable) id<FBSDKGameRequestDialogDelegate> delegate;
 
 /**
   The content for game request.
@@ -47,7 +69,7 @@
 /**
   Specifies whether frictionless requests are enabled.
  */
-@property (nonatomic, assign) BOOL frictionlessRequestsEnabled;
+@property (nonatomic, assign, getter=isFrictionlessRequestsEnabled) BOOL frictionlessRequestsEnabled;
 
 /**
   A Boolean value that indicates whether the receiver can initiate a game request.
@@ -59,7 +81,7 @@
  @see validateWithError:
  @return YES if the receiver can share, otherwise NO.
  */
-- (BOOL)canShow;
+@property (nonatomic, readonly) BOOL canShow;
 
 /**
   Begins the game request from the receiver.
@@ -83,6 +105,7 @@
  receive the information.  For example, if the person is not signed into the containing app, the shower may not be able
  to distinguish between completion of a game request and cancellation.
  */
+NS_SWIFT_NAME(GameRequestDialogDelegate)
 @protocol FBSDKGameRequestDialogDelegate <NSObject>
 
 /**
@@ -90,7 +113,7 @@
  @param gameRequestDialog The FBSDKGameRequestDialog that completed.
  @param results The results from the dialog.  This may be nil or empty.
  */
-- (void)gameRequestDialog:(FBSDKGameRequestDialog *)gameRequestDialog didCompleteWithResults:(NSDictionary *)results;
+- (void)gameRequestDialog:(FBSDKGameRequestDialog *)gameRequestDialog didCompleteWithResults:(NSDictionary<NSString *, id> *)results;
 
 /**
   Sent to the delegate when the game request encounters an error.
@@ -106,3 +129,7 @@
 - (void)gameRequestDialogDidCancel:(FBSDKGameRequestDialog *)gameRequestDialog;
 
 @end
+
+NS_ASSUME_NONNULL_END
+
+#endif

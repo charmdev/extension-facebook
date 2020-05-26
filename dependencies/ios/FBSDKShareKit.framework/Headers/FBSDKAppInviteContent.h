@@ -16,10 +16,17 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#import "TargetConditionals.h"
+
+#if !TARGET_OS_TV
+
 #import <Foundation/Foundation.h>
 
-#import <FBSDKCoreKit/FBSDKCopying.h>
-#import <FBSDKShareKit/FBSDKSharingValidation.h>
+#import "FBSDKCoreKitImport.h"
+
+#import "FBSDKSharingValidation.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  NS_ENUM(NSUInteger, FBSDKAppInviteDestination)
@@ -31,11 +38,12 @@ typedef NS_ENUM(NSUInteger, FBSDKAppInviteDestination)
   FBSDKAppInviteDestinationFacebook = 0,
   /** Deliver to Messenger. */
   FBSDKAppInviteDestinationMessenger,
-};
+} NS_SWIFT_NAME(AppInviteDestination);
 
 /**
   A model for app invite.
  */
+NS_SWIFT_NAME(AppInviteContent)
 @interface FBSDKAppInviteContent : NSObject <FBSDKCopying, FBSDKSharingValidation, NSSecureCoding>
 
 /**
@@ -44,7 +52,7 @@ typedef NS_ENUM(NSUInteger, FBSDKAppInviteDestination)
 
  This is optional.  If you don't include it a fallback image will be used.
 */
-@property (nonatomic, copy) NSURL *appInvitePreviewImageURL;
+@property (nonatomic, copy, nullable) NSURL *appInvitePreviewImageURL;
 
 /**
   An app link target that will be used as a target when the user accept the invite.
@@ -55,20 +63,13 @@ typedef NS_ENUM(NSUInteger, FBSDKAppInviteDestination)
 @property (nonatomic, copy) NSURL *appLinkURL;
 
 /**
-
-@warning Use `appInvitePreviewImageURL` instead.
- */
-@property (nonatomic, copy) NSURL *previewImageURL
-DEPRECATED_MSG_ATTRIBUTE("use appInvitePreviewImageURL instead");
-
-/**
   Promotional code to be displayed while sending and receiving the invite.
 
 
  This is optional. This can be between 0 and 10 characters long and can contain
  alphanumeric characters only. To set a promo code, you need to set promo text.
  */
-@property (nonatomic, copy) NSString *promotionCode;
+@property (nonatomic, copy, nullable) NSString *promotionCode;
 
 /**
   Promotional text to be displayed while sending and receiving the invite.
@@ -77,7 +78,7 @@ DEPRECATED_MSG_ATTRIBUTE("use appInvitePreviewImageURL instead");
  This is optional. This can be between 0 and 80 characters long and can contain
  alphanumeric and spaces only.
  */
-@property (nonatomic, copy) NSString *promotionText;
+@property (nonatomic, copy, nullable) NSString *promotionText;
 
 /**
   Destination for the app invite.
@@ -85,7 +86,7 @@ DEPRECATED_MSG_ATTRIBUTE("use appInvitePreviewImageURL instead");
 
  This is optional and for declaring destination of the invite.
  */
-@property FBSDKAppInviteDestination destination;
+@property (nonatomic, assign) FBSDKAppInviteDestination destination;
 
 /**
   Compares the receiver to another app invite content.
@@ -95,3 +96,7 @@ DEPRECATED_MSG_ATTRIBUTE("use appInvitePreviewImageURL instead");
 - (BOOL)isEqualToAppInviteContent:(FBSDKAppInviteContent *)content;
 
 @end
+
+NS_ASSUME_NONNULL_END
+
+#endif

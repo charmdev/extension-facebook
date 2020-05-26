@@ -16,22 +16,15 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#import <Foundation/Foundation.h>
+// Importing FBSDKCoreKit is tricky due to build variants so putting it here allows us
+// to share that logic in one place.
 
-/**
- AKFResponseType
-
-  The types of response that can be returned from a login.
- */
-typedef NS_ENUM(NSUInteger, AKFResponseType) {
-  /*
-    Indicates that the requested response type is an access token.
-   */
-  AKFResponseTypeAccessToken = 0,
-
-  /*
-    Indicates that the requested response type is an authorization code that can be exchanged for an access
-   token.
-   */
-  AKFResponseTypeAuthorizationCode,
-};
+#if defined BUCK
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
+#elif defined __cplusplus
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
+#elif defined FBSDKCOCOAPODS
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
+#else
+@import FBSDKCoreKit;
+#endif
