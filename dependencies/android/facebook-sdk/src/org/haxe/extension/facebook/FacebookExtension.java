@@ -537,8 +537,10 @@ public class FacebookExtension extends Extension {
 
 	@Override public boolean onActivityResult (int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(!callbackManager.onActivityResult(requestCode, resultCode, data))
-			Log.d(TAG, "callbackManager.onActivityResult cannot be handled requestCode: " + requestCode);
+		if (callbackManager != null) {
+			if(!callbackManager.onActivityResult(requestCode, resultCode, data))
+				Log.d(TAG, "callbackManager.onActivityResult cannot be handled requestCode: " + requestCode);
+		}
 		return true;
 	}
 
