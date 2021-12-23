@@ -443,68 +443,75 @@ public class FacebookExtension extends Extension {
 
 	}
 
-    private static Map<String, String> getPayloadFromJson(String jsonString) {
-        Type type = new TypeToken<Map<String, String>>(){}.getType();
-        Map<String, String> payload = new Gson().fromJson(jsonString, type);
-        return payload;
-    }
+	private static Map<String, String> getPayloadFromJson(String jsonString) {
+		Type type = new TypeToken<Map<String, String>>(){}.getType();
+		Map<String, String> payload = new Gson().fromJson(jsonString, type);
+		return payload;
+	}
 
 
-    private static Bundle getAnalyticsBundleFromJson(String jsonString) {
-        Map<String, String> payloadMap = getPayloadFromJson(jsonString);
-        Bundle payloadBundle = new Bundle();
-        for (Map.Entry<String, String> entry : payloadMap.entrySet()) {
-            payloadBundle.putString(entry.getKey(), entry.getValue());
-        }
+	private static Bundle getAnalyticsBundleFromJson(String jsonString) {
+		Map<String, String> payloadMap = getPayloadFromJson(jsonString);
+		Bundle payloadBundle = new Bundle();
+		for (Map.Entry<String, String> entry : payloadMap.entrySet()) {
+			payloadBundle.putString(entry.getKey(), entry.getValue());
+		}
 
-        return payloadBundle;
-    }
+		return payloadBundle;
+	}
 
-    public static void logEvent(String eventName, String jsonPayload)
-    {
-        Log.d(TAG, "log event " + eventName + " with payload: " + jsonPayload);
+	public static void logEvent(String eventName, String jsonPayload)
+	{
+		Log.d(TAG, "log event " + eventName + " with payload: " + jsonPayload);
 
-        Bundle payloadBundle = getAnalyticsBundleFromJson(jsonPayload);
-        logger.logEvent(eventName, payloadBundle);
-    }
+		Bundle payloadBundle = getAnalyticsBundleFromJson(jsonPayload);
+		logger.logEvent(eventName, payloadBundle);
+	}
 
-    public static void setDebug()
-    {
-        Log.d(TAG, "DEBUG mode used");
+	public static void setDebug()
+	{
+		Log.d(TAG, "DEBUG mode used");
 
-        FacebookSdk.setIsDebugEnabled(true);
-        FacebookSdk.addLoggingBehavior(LoggingBehavior.APP_EVENTS);
-    }
+		FacebookSdk.setIsDebugEnabled(true);
+		FacebookSdk.addLoggingBehavior(LoggingBehavior.APP_EVENTS);
+	}
 
-    public static void setUserID(String userID) {
-        Log.d(TAG, "setUserID to: " + userID);
+	public static void setUserID(String userID) {
+		Log.d(TAG, "setUserID to: " + userID);
 
-        logger.setUserID(userID);
-        logger.updateUserProperties(
-                new Bundle(),
-                new GraphRequest.Callback() {
-                    @Override
-                    public void onCompleted(GraphResponse response) {
-                        if (callbacks!=null) {
-                            FacebookRequestError error = response.getError();
-                            GraphRequest req = response.getRequest();
-                            if (error==null) {
-                                Log.d(TAG, "on setUserID success");
-                            } else {
-                                String errorMessage;
+		try {
+			if (userID != null) {
+				logger.setUserID(userID);
+			}
+			logger.updateUserProperties(
+					new Bundle(),
+					new GraphRequest.Callback() {
+						@Override
+						public void onCompleted(GraphResponse response) {
+							if (callbacks!=null) {
+								FacebookRequestError error = response.getError();
+								GraphRequest req = response.getRequest();
+								if (error==null) {
+									Log.d(TAG, "on setUserID success");
+								} else {
+									String errorMessage;
 
-                                if (error.getRequestResult() == null) {
-                                    errorMessage = "{}";
-                                } else {
-                                    errorMessage = error.getRequestResult().toString();
-                                }
-                                Log.d(TAG, "on setUserID error: " + errorMessage);
-                            }
-                        }
-                    }
-                }
-        );
-    }
+									if (error.getRequestResult() == null) {
+										errorMessage = "{}";
+									} else {
+										errorMessage = error.getRequestResult().toString();
+									}
+									Log.d(TAG, "on setUserID error: " + errorMessage);
+								}
+							}
+						}
+					}
+			);
+		} catch (Exception e) {
+			
+		}
+
+	}
 
 	public static void trackPurchase(float purchaseAmount, String currency, String parameters)
 	{
@@ -519,7 +526,7 @@ public class FacebookExtension extends Extension {
 
 		try {
 			PackageInfo info = mainContext.getPackageManager().getPackageInfo(
-                mainContext.getPackageName(),
+				mainContext.getPackageName(),
 				PackageManager.GET_SIGNATURES
 			);
 			for (Signature signature : info.signatures) {
