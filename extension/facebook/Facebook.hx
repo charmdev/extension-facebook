@@ -23,6 +23,8 @@ import cpp.vm.Thread;
 import neko.vm.Thread;
 #end
 
+import haxe.ds.StringMap;
+
 @:enum
 abstract PermissionsType(Int) {
 	var Publish = 0;
@@ -194,7 +196,7 @@ class Facebook extends TaskExecutor {
 		#else
 		parameters.set("access_token", accessToken);
 		RestClient.deleteAsync(
-			"https://graph.facebook.com/v2.4"+prependSlash(resource),
+			"https://graph.facebook.com/v18.0"+prependSlash(resource),
 			function(x) {
 				try { 
 					var parsed = Json.parse(x);
@@ -249,24 +251,27 @@ class Facebook extends TaskExecutor {
 		);
 		#else
 		parameters.set("access_token", accessToken);
-		RestClient.getAsync(
-			"https://graph.facebook.com/v2.4"+prependSlash(resource),
-			function(x) {
+
+		var headerMap:StringMap<String> = new StringMap();
+		var parameterMap:StringMap<String> = new StringMap();
+
+		IOSNetworking.httpRequest(
+			"https://graph.facebook.com/v18.0"+prependSlash(resource)+"?access_token="+accessToken+"&fields="+parameters.get("fields"),
+			"GET",
+			headerMap,
+			parameterMap,
+			function (x) {
 				try { 
 					var parsed = Json.parse(x);
 					onComplete(parsed);
-				} catch(error:String) { trace(error, x); }		
-			},
-			parameters,
-			function(x) {
-				try { 
-					var parsed = Json.parse(x);
-					onError(parsed);
-				} catch(error:String) { trace(error, x); }	
+				} catch(error:String) { trace(error, x); }
+				},
+
+			function (er) {
+				onError("error");
 			}
 		);
 		#end
-
 	}
 
 	// get the full list of some resource (manages paging)
@@ -343,12 +348,12 @@ class Facebook extends TaskExecutor {
 		#else
 		parameters.set("access_token", accessToken);
 		RestClient.postAsync(
-			"https://graph.facebook.com/v2.4"+prependSlash(resource),
+			"https://graph.facebook.com/v18.0"+prependSlash(resource),
 			function(x) {
 				try { 
 					var parsed = Json.parse(x);
 					onComplete(parsed);
-				} catch(error:String) { trace(error, x); }		
+				} catch(error:String) { trace(error, x); }
 			},
 			parameters,
 			function(x) {
