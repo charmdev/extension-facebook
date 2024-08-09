@@ -17,6 +17,7 @@
 #define safe_alloc_string(a) (alloc_string(a!=NULL ? a : ""))
 #define safe_val_call0(func) if (func!=NULL) val_call0(func->get())
 #define safe_val_call1(func, arg1) if (func!=NULL) val_call1(func->get(), arg1)
+#define safe_val_call2(func, arg1, arg2) if (func!=NULL) val_call2(func->get(), arg1, arg2)
 #define safe_val_string(str) str==NULL ? "" : std::string(val_string(str))
 
 AutoGCRoot* _onTokenChange;
@@ -27,6 +28,10 @@ AutoGCRoot* _onAppRequestComplete;
 AutoGCRoot* _onAppRequestFail;
 AutoGCRoot* _onShareComplete;
 AutoGCRoot* _onShareFail;
+
+//void extension_facebook::onTokenChange(const char *token, const char *id) {
+//	safe_val_call2(_onTokenChange, safe_alloc_string(token), safe_alloc_string(id));
+//}
 
 void extension_facebook::onTokenChange(const char *token) {
 	safe_val_call1(_onTokenChange, safe_alloc_string(token));
@@ -97,6 +102,21 @@ static value extension_facebook_setDebug() {
 	return alloc_null();
 }
 DEFINE_PRIM(extension_facebook_setDebug, 0);
+
+static value extension_facebook_logInWithLimited(value permissions) {
+	int n = 0;
+	if (permissions!=NULL) {
+		n = val_array_size(permissions);
+	}
+	std::vector<std::string> stlPermissions;
+	for (int i=0;i<n;++i) {
+		std::string str(val_string(val_array_i(permissions, i)));
+		stlPermissions.push_back(str);
+	}
+	extension_facebook::logInWithLimited(stlPermissions);
+	return alloc_null();
+}
+DEFINE_PRIM(extension_facebook_logInWithLimited, 1);
 
 static value extension_facebook_logInWithPublishPermissions(value permissions) {
 	int n = 0;

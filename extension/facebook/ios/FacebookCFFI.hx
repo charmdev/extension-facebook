@@ -7,18 +7,6 @@ import haxe.Json;
 @CPP_PRIMITIVE_PREFIX("extension_facebook")
 class FacebookCFFI {
 
-	/*
-	IOS Facebook SDK returns JSONs in the style:
-		{
-		  "to[0]" : "10207238882472683",
-		  "request" : "1647123868893945"
-		}
-	this method converts to:
-		{
-			"to" : ["10207238882472683"],
-			"request" : "1647123868893945"
-		}
-	*/
 	static function postProcessJSON(inStr : String) : String {
 		var result = inStr;
 		try {
@@ -58,12 +46,14 @@ class FacebookCFFI {
 	}
 
 	@CPP public static function init(onTokenChange : String->Void) {}
+	//@CPP public static function init(onTokenChange : String->String->Void) {}
 	@CPP public static function logout() {}
 	@CPP public static function setDebug() {}
 	@CPP public static function logEvent(eventName:String, jsonPayload:String) {}
 	@CPP public static function logPurchase(purchaseAmount:Float, currency:String, parameters:String) {}
 	@CPP public static function logInWithPublishPermissions(permissions : Array<String> = null) {}
 	@CPP public static function logInWithReadPermissions(permissions : Array<String> = null) {}
+	@CPP public static function logInWithLimited(permissions : Array<String> = null) {}
 
 	@CPP public static function shareLink(
 		contentURL : String,
@@ -81,9 +71,9 @@ class FacebookCFFI {
 		data : String = null
 	) {};
 
-	@CPP public static function setOnLoginSuccessCallback(f : Void->Void);
-	@CPP public static function setOnLoginCancelCallback(f : Void->Void);
-	@CPP public static function setOnLoginErrorCallback(f : String->Void);
+	@CPP public static function setOnLoginSuccessCallback(f:Void->Void);
+	@CPP public static function setOnLoginCancelCallback(f:Void->Void);
+	@CPP public static function setOnLoginErrorCallback(f:String->Void);
 
 	@CPP("extension_facebook","setOnAppRequestComplete")
 	static function _setOnAppRequestComplete(f : String->Void);

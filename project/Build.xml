@@ -10,6 +10,10 @@
 		<compilerflag value="-framework"/>
 		<compilerflag value="FBSDKCoreKit"/>
 		<compilerflag value="-std=c++11" />
+		<compilerflag value="-fobjc-arc" />
+		<!-- <compilerflag value="-fcxx-modules" />
+		<compilerflag value="-DCLANG_ENABLE_MODULES=YES" /> -->
+
 		<file name="ios/Facebook.mm"/>
 		<file name="ios/FacebookObserver.mm"/>
 		<file name="ios/CallbacksDelegate.mm"/>

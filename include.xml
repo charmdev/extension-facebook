@@ -13,9 +13,12 @@
 		<ndll name="extension_facebook" />
 		<dependency name="CoreImage.framework" />
 		<dependency name="Accelerate.framework" />
+		
 		<dependency path="dependencies/ios/FBSDKCoreKit.framework" />
 		<dependency path="dependencies/ios/FBSDKLoginKit.framework" />
-		<dependency path="dependencies/ios/FBSDKShareKit.framework" />
+		<dependency path="dependencies/ios/FBSDKCoreKit_Basics.framework" />
+		<dependency path="dependencies/ios/FBAEMKit.framework" />
+
 		<template path="template/PROJ-Info.plist" rename="${APP_TITLE}-Info.plist" />
 	</section>
 

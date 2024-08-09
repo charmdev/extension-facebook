@@ -1,17 +1,14 @@
 #import <CallbacksDelegate.h>
-#import <FacebookObserver.h>
-#import <FBSDKCoreKit/FBSDKCoreKit.h>
-#import <FBSDKLoginKit/FBSDKLoginKit.h>
-#import <FBSDKShareKit/FBSDKGameRequestContent.h>
-#import <FBSDKShareKit/FBSDKGameRequestDialog.h>
-#import <FBSDKShareKit/FBSDKShareDialog.h>
-#import <FBSDKShareKit/FBSDKShareLinkContent.h>
-
 #import <Facebook.h>
+#import <FacebookObserver.h>
+#import <AuthenticationServices/AuthenticationServices.h>
+#import <SafariServices/SafariServices.h>
+#import <FBSDKCoreKit/FBSDKCoreKit-Swift.h>
+#import <FBSDKLoginKit/FBSDKLoginKit-Swift.h>
+
 
 namespace extension_facebook {
 
-	CallbacksDelegate *callbacks;
 	FacebookObserver *obs;
 	FBSDKLoginManager *login;
 	UIViewController *root;
@@ -29,7 +26,6 @@ namespace extension_facebook {
 
 	void init() {
 		root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
-		callbacks = [[CallbacksDelegate alloc] init];
 		
 		[[FBSDKApplicationDelegate sharedInstance] application:[UIApplication sharedApplication]
 									didFinishLaunchingWithOptions:[[NSMutableDictionary alloc] init]];
@@ -42,12 +38,11 @@ namespace extension_facebook {
 			name:FBSDKAccessTokenDidChangeNotification
 			object:nil
 		];
-
 	}
 
 	void setDebug() {
-		NSLog(@"Facebook: set debug mode");
-		[FBSDKSettings enableLoggingBehavior:FBSDKLoggingBehaviorAppEvents];
+		//NSLog(@"Facebook: set debug mode");
+		//[FBSDKSettings enableLoggingBehavior:FBSDKLoggingBehaviorAppEvents];
 	}
 	
 	void logEvent(std::string name, std::string payload) {
@@ -59,10 +54,13 @@ namespace extension_facebook {
 		NSError * error = nil;
 		NSDictionary * params = [NSJSONSerialization JSONObjectWithData:jsonData options:kNilOptions error:&error];
 		
-		[FBSDKAppEvents logEvent:nsName parameters:params];
+		//[FBSDKAppEvents logEvent:nsName parameters:params];
 	}
 	
 	void logPurchase(double value, std::string currency, std::string payload) {
+
+		return;
+		
 		NSLog(@"Facebook: logPurchase val=%f", value);
         NSLog(@"Facebook: logPurchase currency=%s", currency.c_str());
 		NSLog(@"Facebook: logPurchase payload=%s", payload.c_str());
@@ -74,11 +72,36 @@ namespace extension_facebook {
 		NSError * error = nil;
 		NSDictionary * params = [NSJSONSerialization JSONObjectWithData:jsonData options:kNilOptions error:&error];
 		
-		[FBSDKAppEvents logPurchase:value currency:nsCurrency parameters:params];
+		//[FBSDKAppEvents logPurchase:value currency:nsCurrency parameters:params];
 	}
 	
 	void logOut() {
 		[login logOut];
+	}
+
+	void logInWithLimited(std::vector<std::string> &permissions) {
+		NSMutableArray *nsPermissions = [[NSMutableArray alloc] init];
+		for (auto p : permissions) {
+			[nsPermissions addObject:[NSString stringWithUTF8String:p.c_str()]];
+		}
+
+		FBSDKLoginConfiguration *configuration = [[FBSDKLoginConfiguration alloc]
+													initWithPermissions:nsPermissions
+													tracking:FBSDKLoginTrackingLimited ];
+												
+		[login logInFromViewController:root
+				configuration:configuration
+				completion:^(FBSDKLoginManagerLoginResult * _Nullable result, NSError * _Nullable error) {
+			
+			if (error) {
+				onLoginErrorCallback([error.localizedDescription UTF8String]);
+			}else if (result.isCancelled) {
+				onLoginCancelCallback();
+			}else {
+				onLoginSuccessCallback();
+			}
+		}];
+		
 	}
 
 	void logInWithPublishPermissions(std::vector<std::string> &permissions) {
@@ -86,6 +109,7 @@ namespace extension_facebook {
 		for (auto p : permissions) {
 			[nsPermissions addObject:[NSString stringWithUTF8String:p.c_str()]];
 		}
+		
 		[login logInWithPermissions:nsPermissions fromViewController:root handler:^(FBSDKLoginManagerLoginResult *result, NSError *error) {
 			if (error) {
 				onLoginErrorCallback([error.localizedDescription UTF8String]);
@@ -102,7 +126,6 @@ namespace extension_facebook {
 		for (auto p : permissions) {
 			[nsPermissions addObject:[NSString stringWithUTF8String:p.c_str()]];
 		}
-
 		[login logInWithPermissions:nsPermissions fromViewController:root handler:^(FBSDKLoginManagerLoginResult *result, NSError *error) {
 			if (error) {
 				onLoginErrorCallback([error.localizedDescription UTF8String]);
@@ -119,29 +142,7 @@ namespace extension_facebook {
 		std::string contentTitle,
 		std::string imageURL,
 		std::string contentDescription) {
-
-		FBSDKShareLinkContent *content = [[FBSDKShareLinkContent alloc] init];
-		content.contentURL = [NSURL URLWithString:[NSString stringWithUTF8String:contentURL.c_str()]];
-		/*if (contentTitle!="") {
-			content.contentTitle = [NSString stringWithUTF8String:contentTitle.c_str()];
-		}
-		if (imageURL!="") {
-			content.imageURL = [NSURL URLWithString:[NSString stringWithUTF8String:imageURL.c_str()]];
-		}
-		if (contentDescription!="") {
-			content.contentDescription = [NSString stringWithUTF8String:contentDescription.c_str()];
-		}*/
-
-		int osVersion = [[NSProcessInfo processInfo] operatingSystemVersion].majorVersion;
-		FBSDKShareDialog *dialog = [[FBSDKShareDialog alloc] init];
-		dialog.fromViewController = root;
-		dialog.shareContent = content;
-		dialog.delegate = callbacks;
-		if (osVersion>=9) {
-			dialog.mode = FBSDKShareDialogModeFeedWeb;
-		}
-		[dialog show];
-
+			
 	}
 
 	void appRequest(
@@ -151,40 +152,6 @@ namespace extension_facebook {
 		std::string objectId,
 		int actionType,
 		std::string data) {
-
-		FBSDKGameRequestContent *gameRequestContent = [[FBSDKGameRequestContent alloc] init];
-		gameRequestContent.message = [NSString stringWithUTF8String:message.c_str()];
-		gameRequestContent.title = [NSString stringWithUTF8String:title.c_str()];
-
-		NSMutableArray *nsRecipients = [[NSMutableArray alloc] init];
-		for (auto p : recipients) {
-			[nsRecipients addObject:[NSString stringWithUTF8String:p.c_str()]];
-		}
-		gameRequestContent.recipients = nsRecipients;
-
-		if (objectId!="") {
-			gameRequestContent.objectID = [NSString stringWithUTF8String:objectId.c_str()];
-		}
-
-		switch (actionType) {
-			case 1:
-			gameRequestContent.actionType = FBSDKGameRequestActionTypeSend;
-			break;
-			case 2:
-			gameRequestContent.actionType = FBSDKGameRequestActionTypeAskFor;
-			break;
-			case 3:
-			gameRequestContent.actionType = FBSDKGameRequestActionTypeTurn;
-			break;
-			default:
-			gameRequestContent.actionType = FBSDKGameRequestActionTypeSend;
-			break;
-		}
-
-		if (data!="") {
-			gameRequestContent.data = [NSString stringWithUTF8String:data.c_str()];
-		}
-		[FBSDKGameRequestDialog showWithContent:gameRequestContent delegate:callbacks];
 
 	}
 

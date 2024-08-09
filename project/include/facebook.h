@@ -10,6 +10,7 @@ namespace extension_facebook {
 	void init();
 	void logOut();
 
+	void logInWithLimited(std::vector<std::string> &permissions);
 	void logInWithPublishPermissions(std::vector<std::string> &permissions);
 	void logInWithReadPermissions(std::vector<std::string> &permissions);
 
