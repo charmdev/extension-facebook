@@ -13,6 +13,6 @@ android {
 
 dependencies {
 	api project(':deps:extension-api')
-	implementation 'com.facebook.android:facebook-android-sdk:16.3.0'
+	implementation 'com.facebook.android:facebook-android-sdk:12.3.0'
 	implementation "com.google.code.gson:gson:${rootProject.ext.gsonVersion}"
 }
