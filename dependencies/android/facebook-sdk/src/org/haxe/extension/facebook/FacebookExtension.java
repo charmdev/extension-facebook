@@ -19,11 +19,9 @@ import com.facebook.HttpMethod;
 import com.facebook.internal.BundleJSONConverter;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.model.GameRequestContent.ActionType;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.widget.AppInviteDialog;
 import com.facebook.share.widget.GameRequestDialog.Result;
 import com.facebook.share.widget.GameRequestDialog;
 import com.facebook.share.widget.ShareDialog;
@@ -73,9 +71,6 @@ public class FacebookExtension extends Extension {
 		if (o instanceof JSONArray || o instanceof JSONObject) {
 			return o;
 		}
-		if (o.equals(null)) {
-			return o;
-		}
 		try {
 			if (o instanceof Collection) {
 				return new JSONArray((Collection) o);
@@ -100,7 +95,8 @@ public class FacebookExtension extends Extension {
 				o instanceof String) {
 				return o;
 			}
-			if (o.getClass().getPackage().getName().startsWith("java.")) {
+			Package pkg = o.getClass().getPackage();
+			if (pkg != null && pkg.getName().startsWith("java.")) {
 				return o.toString();
 			}
 		} catch (Exception ignored) {
@@ -156,6 +152,10 @@ public class FacebookExtension extends Extension {
 
 	private static void servicesInit() throws ExceptionInInitializerError
 	{
+		if (mainActivity == null) {
+			Log.e(TAG, "servicesInit: mainActivity is null");
+			throw new ExceptionInInitializerError("mainActivity is null");
+		}
 		requestDialog = new GameRequestDialog(mainActivity);
 		shareDialog = new ShareDialog(mainActivity);
 
@@ -266,55 +266,37 @@ public class FacebookExtension extends Extension {
 	}
 
 	public static void logInWithPublishPermissions(String permissions) {
+		if (mainActivity == null) {
+			Log.e(TAG, "logInWithPublishPermissions: mainActivity is null");
+			return;
+		}
 		String[] arr = permissions.split(";");
 		LoginManager.getInstance().logInWithPublishPermissions(mainActivity, Arrays.asList(arr));
 	}
 
 	public static void logInWithReadPermissions(String permissions) {
+		if (mainActivity == null) {
+			Log.e(TAG, "logInWithReadPermissions: mainActivity is null");
+			return;
+		}
 		String[] arr = permissions.split(";");
 		LoginManager.getInstance().logInWithReadPermissions(mainActivity, Arrays.asList(arr));
 	}
 
 	public static void appInvite(String applinkUrl, String previewImageUrl) {
-		if (AppInviteDialog.canShow()) {
-			AppInviteContent content = new AppInviteContent.Builder()
-					.setApplinkUrl(applinkUrl)
-					.setPreviewImageUrl(previewImageUrl)
-					.build();
-			AppInviteDialog appInviteDialog = new AppInviteDialog(mainActivity);
-			appInviteDialog.registerCallback(callbackManager, new FacebookCallback<AppInviteDialog.Result>() {
-				@Override
-				public void onSuccess(AppInviteDialog.Result result) {
-					if (callbacks!=null) {
-						Bundle bundle = result.getData();
-						JSONObject json = new JSONObject();
-						Set<String> keys = bundle.keySet();
-						for (String key : keys) {
-							try {
-								json.put(key, wrap(bundle.get(key)));
-							} catch (JSONException e) {
-								Log.d(TAG, "JSONException: " + e.toString());
-							}
-						}
-						callbacks.call1("_onAppInviteComplete", json.toString());
-					}
-				}
 
-				@Override
-				public void onCancel() {
-					if (callbacks!=null) {
-						callbacks.call1("_onAppInviteFail", "User canceled");
-					}
-				}
-
-				@Override
-				public void onError(FacebookException e) {
-					if (callbacks!=null) {
-						callbacks.call1("_onAppInviteFail", e.toString());
-					}
-				}
-			});
-			appInviteDialog.show(content);
+		Log.w(TAG, "appInvite: AppInviteDialog is deprecated in Facebook SDK 12.0+. Use shareLink() instead.");
+		
+		if (mainActivity == null) {
+			Log.e(TAG, "appInvite: mainActivity is null");
+			if (callbacks != null) {
+				callbacks.call1("_onAppInviteFail", "Activity is null");
+			}
+			return;
+		}
+		
+		if (callbacks != null) {
+			callbacks.call1("_onAppInviteFail", "AppInvite is deprecated. Please use shareLink() method instead.");
 		}
 	}
 
@@ -384,6 +366,13 @@ public class FacebookExtension extends Extension {
 		String methodStr,
 		final int id
 	) {
+		if (mainActivity == null) {
+			Log.e(TAG, "graphRequest: mainActivity is null");
+			if (callbacks != null) {
+				callbacks.call3("_onGraphCallback", "error", "{\"error\":\"Activity is null\"}", id);
+			}
+			return;
+		}
 
 		Bundle bundle = new Bundle();
 		try {
@@ -464,6 +453,10 @@ public class FacebookExtension extends Extension {
 	{
 		Log.d(TAG, "log event " + eventName + " with payload: " + jsonPayload);
 
+		if (logger == null) {
+			Log.e(TAG, "logEvent: logger is null");
+			return;
+		}
 		Bundle payloadBundle = getAnalyticsBundleFromJson(jsonPayload);
 		logger.logEvent(eventName, payloadBundle);
 	}
@@ -479,42 +472,28 @@ public class FacebookExtension extends Extension {
 	public static void setUserID(String userID) {
 		Log.d(TAG, "setUserID to: " + userID);
 
+		if (logger == null) {
+			Log.e(TAG, "setUserID: logger is null");
+			return;
+		}
 		try {
 			if (userID != null) {
 				logger.setUserID(userID);
+				logger.flush();
+				Log.d(TAG, "on setUserID success");
 			}
-			logger.updateUserProperties(
-					new Bundle(),
-					new GraphRequest.Callback() {
-						@Override
-						public void onCompleted(GraphResponse response) {
-							if (callbacks!=null) {
-								FacebookRequestError error = response.getError();
-								GraphRequest req = response.getRequest();
-								if (error==null) {
-									Log.d(TAG, "on setUserID success");
-								} else {
-									String errorMessage;
-
-									if (error.getRequestResult() == null) {
-										errorMessage = "{}";
-									} else {
-										errorMessage = error.getRequestResult().toString();
-									}
-									Log.d(TAG, "on setUserID error: " + errorMessage);
-								}
-							}
-						}
-					}
-			);
 		} catch (Exception e) {
-			
+			Log.e(TAG, "on setUserID error: " + e.toString());
 		}
 
 	}
 
 	public static void trackPurchase(float purchaseAmount, String currency, String parameters)
 	{
+		if (logger == null) {
+			Log.e(TAG, "trackPurchase: logger is null");
+			return;
+		}
 		// Bundle parameters
 		Bundle bundle = getAnalyticsBundleFromJson(parameters);
 		logger.logPurchase(BigDecimal.valueOf(purchaseAmount), Currency.getInstance(currency), bundle);
